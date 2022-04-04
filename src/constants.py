@@ -1,0 +1,1 @@
+FIELD_IS_TEXT = 'is_text'
