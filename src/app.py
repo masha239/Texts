@@ -1,15 +1,7 @@
 import onnxruntime as rt
 from argparse import ArgumentParser
-import numpy as np
 from flask import Flask, request, jsonify
-from extract import process_url
-import constants
-
-
-def transform_answer(ans):
-    if ans == 1:
-        return 'Yes'
-    return 'No'
+from predict import *
 
 
 def parse_args():
@@ -46,18 +38,25 @@ def predict():
         url = request.get_json()['url']
     except KeyError:
         return 'bad request', constants.CODE_BAD_REQUEST
+    return predict_url(url, sess)
 
-    code, features = process_url(url)
 
-    if code != constants.CODE_OK:
-        return 'Model failed', constants.CODE_FAILED
+@app.route('/forward_batch', methods=['POST'])
+def predict_batch():
+    try:
+        infile = request.get_json()['url']
+    except KeyError:
+        return 'bad request', constants.CODE_BAD_REQUEST
+    return predict_batch(infile, sess)
 
-    input_name = sess.get_inputs()[0].name
-    label_name = sess.get_outputs()[0].name
-    pred_onx = sess.run([label_name],
-                        {input_name: features.astype(np.float32)})
 
-    return transform_answer(pred_onx[0][0])
+@app.route('/evaluate', methods=['GET'])
+def predict_batch():
+    try:
+        infile = request.get_json()['url']
+    except KeyError:
+        return 'bad request', constants.CODE_BAD_REQUEST
+    return evaluate(infile, sess)
 
 
 if __name__ == '__main__':
