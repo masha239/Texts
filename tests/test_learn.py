@@ -5,7 +5,8 @@ import tempfile
 import pandas as pd
 import shutil
 import onnxruntime as rt
-from src.learn import create_model
+from datetime import date
+from src.learn import create_model, get_hash
 import src.constants
 
 
@@ -17,7 +18,7 @@ class Args:
         dull_columns = ['a'] * 13 + [src.constants.FIELD_IS_TEXT]
         df = pd.DataFrame(dull_data, columns=dull_columns)
         df.to_csv(self.infile)
-        self.hash = 1111
+        self.hash = '0'
         self.seed = 0
         self.experiment = 'dull experiment'
 
@@ -40,18 +41,8 @@ def test_file_created(folders):
     assert os.path.exists(folders['args'].outfile)
 
 
-def test_predictions_zeros(folders):
-    sess = folders['sess']
-    input_name = sess.get_inputs()[0].name
-    label_name = sess.get_outputs()[0].name
-    new_dull_data = np.zeros((5, 14), dtype=float)
-    pred_onx = sess.run([label_name],
-                        {input_name: new_dull_data.astype(np.float32)})[0]
-    assert sum(pred_onx) == 0
-
-
 def test_metadata(folders):
     ans = folders['sess']._model_meta.custom_metadata_map
-    assert ans['hash'] == folders['args']['hash']
-    assert ans['data'] == folders['args']['data']
-    assert ans['experiment'] == folders['args']['experiment']
+    assert ans['hash_commit'] == get_hash()
+    assert ans['created'] == date.today().__str__()
+    assert ans['experiment'] == folders['args'].experiment

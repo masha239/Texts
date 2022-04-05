@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import GridSearchCV, train_test_split
@@ -15,6 +17,14 @@ from datetime import date
 def state_seed(seed=0):
     np.random.seed(seed)
     random.seed(seed)
+
+
+def get_hash():
+    os.system('git rev-parse HEAD > hash.txt')
+    with open('hash.txt', 'r') as f:
+        hash = f.readline().strip()
+    os.remove('hash.txt')
+    return hash
 
 
 def create_model(args):
@@ -41,10 +51,11 @@ def create_model(args):
 
     initial_type = [('float_input', FloatTensorType([None, X.shape[1]]))]
     onx = convert_sklearn(estimator, initial_types=initial_type)
+    hash = get_hash()
 
-    params = {'hash_commit': args.hash,
+    params = {'hash_commit': str(hash),
               'created': date.today().__str__(),
-              'experement': args.experiment}
+              'experiment': args.experiment}
     add_metadata_props(onx, params, 15)
 
     with open(args.outfile, 'wb') as f:
@@ -62,10 +73,6 @@ if __name__ == '__main__':
                         required=True,
                         help='Output, .onnx file for pretrained classification'
                              'model')
-    parser.add_argument('--hash',
-                        type=str,
-                        required=True,
-                        help='Commit hash')
     parser.add_argument('--experiment',
                         type=str,
                         required=True,
