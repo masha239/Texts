@@ -33,7 +33,7 @@ def process_url(url):
             el_arr = [float(types[el]) for el in elements]
 
             features = percentiles + el_arr + [float(len(soup.text))]
-            return constants.CODE_OK, np.array(features)
+            return constants.CODE_OK, np.array([features])
         else:
             return constants.CODE_FAILED, None
 
