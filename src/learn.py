@@ -17,31 +17,7 @@ def state_seed(seed=0):
     random.seed(seed)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser('Makes ML model in .onnx format')
-    parser.add_argument('--infile',
-                        type=str,
-                        required=True,
-                        help='Input .csv dataframe for learning')
-    parser.add_argument('--outfile',
-                        type=str,
-                        required=True,
-                        help='Output, .onnx file for pretrained classification'
-                             'model')
-    parser.add_argument('--hash',
-                        type=str,
-                        required=True,
-                        help='Commit hash')
-    parser.add_argument('--experiment',
-                        type=str,
-                        required=True,
-                        help='Experiment name')
-    parser.add_argument('--seed',
-                        type=int,
-                        default=0,
-                        help='Random seed for model')
-
-    args = parser.parse_args()
+def create_model(args):
     df = pd.read_csv(args.infile)
 
     X = df.drop(constants.FIELD_IS_TEXT, axis=1).values
@@ -73,3 +49,31 @@ if __name__ == '__main__':
 
     with open(args.outfile, 'wb') as f:
         f.write(onx.SerializeToString())
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser('Makes ML model in .onnx format')
+    parser.add_argument('--infile',
+                        type=str,
+                        required=True,
+                        help='Input .csv dataframe for learning')
+    parser.add_argument('--outfile',
+                        type=str,
+                        required=True,
+                        help='Output, .onnx file for pretrained classification'
+                             'model')
+    parser.add_argument('--hash',
+                        type=str,
+                        required=True,
+                        help='Commit hash')
+    parser.add_argument('--experiment',
+                        type=str,
+                        required=True,
+                        help='Experiment name')
+    parser.add_argument('--seed',
+                        type=int,
+                        default=0,
+                        help='Random seed for model')
+
+    args = parser.parse_args()
+    create_model(args)
