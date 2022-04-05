@@ -11,6 +11,7 @@ from onnxconverter_common import add_metadata_props
 import constants
 from datetime import date
 
+
 def state_seed(seed=0):
     np.random.seed(seed)
     random.seed(seed)
