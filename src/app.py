@@ -23,7 +23,7 @@ def parse_args():
                         help='Port to use')
     parser.add_argument('--host',
                         type=str,
-                        default='127.0.0.1',
+                        default='0.0.0.0',
                         help='Host to use')
     return parser.parse_args()
 
