@@ -1,8 +1,7 @@
-from src import constants
-from src.extract import process_url
 import numpy as np
-import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
+import constants
+from extract import process_url
 
 
 def predict(X, sess):
@@ -36,8 +35,8 @@ def predict_urls(urls, sess):
 
     X = np.array(X)
     y_pred = predict(X, sess)
-    length = len(y_pred)
-    answer = np.array([y_pred[i] if ok[i] else np.NaN for i in range(length)])
+    length = len(urls)
+    answer = np.array([y_pred[i] if ok[i] else None for i in range(length)])
     return answer
 
 
@@ -57,8 +56,11 @@ def calculate_metrics(y_pred, y_test):
 
 
 def evaluate(df, sess):
-    y_test = df[constants.FIELD_IS_TEXT]
+    y_test = df[constants.FIELD_IS_TEXT].tolist()
     y_pred = predict_urls(df.url, sess)
-    ids = ~np.isnan(y_pred)
-    metrics = calculate_metrics(y_pred[ids], y_test[ids])
+    print(y_pred)
+    print(y_test)
+    y1 = [y_pred[i] for i in range(len(y_pred)) if y_pred[i] is not None]
+    y2 = [y_test[i] for i in range(len(y_pred)) if y_pred[i] is not None]
+    metrics = calculate_metrics(y1, y2)
     return {'answer': make_str(y_pred), 'metrics': metrics}, constants.CODE_OK

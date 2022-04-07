@@ -37,9 +37,11 @@ def process_url(url):
         else:
             return constants.CODE_FAILED, None
 
-    except RuntimeError:
+    except:
         return constants.CODE_BAD_REQUEST, None
 
 
 if __name__ == '__main__':
-    print(process_url('http://yandex.ru'))
+    print(process_url('http://yandex.ru')[1].tolist())
+    print(process_url('http://google.com')[1].tolist())
+    print(process_url('http://vk.com')[1].tolist())

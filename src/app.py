@@ -80,5 +80,4 @@ def evaluate_batch():
 
 
 if __name__ == '__main__':
-    print(sess._model_meta.custom_metadata_map)
     app.run(port=args.port, host=args.host)
