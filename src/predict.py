@@ -62,5 +62,7 @@ def evaluate(df, sess):
     print(y_test)
     y1 = [y_pred[i] for i in range(len(y_pred)) if y_pred[i] is not None]
     y2 = [y_test[i] for i in range(len(y_pred)) if y_pred[i] is not None]
+    if len(y1) == 0:
+        return {'answer': make_str(y_pred), 'metrics': {}}, constants.CODE_FAILED
     metrics = calculate_metrics(y1, y2)
     return {'answer': make_str(y_pred), 'metrics': metrics}, constants.CODE_OK
