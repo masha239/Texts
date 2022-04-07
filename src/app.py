@@ -1,7 +1,12 @@
+import csv
+import io
+
 import onnxruntime as rt
+import pandas as pd
 from argparse import ArgumentParser
 from flask import Flask, request, jsonify
-from predict import *
+from predict import predict_batch, predict_url, evaluate
+import constants
 
 
 def parse_args():
@@ -38,25 +43,40 @@ def predict():
         url = request.get_json()['url']
     except KeyError:
         return 'bad request', constants.CODE_BAD_REQUEST
-    return predict_url(url, sess)
+    return jsonify(predict_url(url, sess))
+
+
+def extract_df(content):
+    stream = io.StringIO(content.stream.read().decode("UTF-8"), newline=None)
+    csv_input = csv.reader(stream)
+    df = pd.DataFrame(csv_input)
+    columns = df.loc[0, :].tolist()
+    data = df.loc[1:, :].to_numpy()
+    df = pd.DataFrame(data, columns=columns)
+    df[constants.FIELD_IS_TEXT] = df[constants.FIELD_IS_TEXT].astype(int)
+    return df
 
 
 @app.route('/forward_batch', methods=['POST'])
-def predict_batch():
+def forward_batch():
     try:
-        infile = request.get_json()['url']
+        content = request.files['datafile']
+        df = extract_df(content)
     except KeyError:
         return 'bad request', constants.CODE_BAD_REQUEST
-    return predict_batch(infile, sess)
+    res = predict_batch(df, sess)
+    return jsonify(res[0]), res[1]
 
 
-@app.route('/evaluate', methods=['GET'])
-def predict_batch():
+@app.route('/evaluate', methods=['POST'])
+def evaluate_batch():
     try:
-        infile = request.get_json()['url']
+        content = request.files['datafile']
+        df = extract_df(content)
     except KeyError:
         return 'bad request', constants.CODE_BAD_REQUEST
-    return evaluate(infile, sess)
+    res = evaluate(df, sess)
+    return jsonify(res[0]), res[1]
 
 
 if __name__ == '__main__':
